@@ -52,6 +52,20 @@ def confirmar_presente(presente_id):
     db.session.commit()
     return jsonify({"mensagem": "Presente confirmado com sucesso!"}), 200
 
+
+# Rota para resetar os testes
+@app.route('/resetar-testes', methods=['GET'])
+def resetar_testes():
+    # Opção A: Apenas desmarcar os confirmados
+    presentes = Presente.query.all()
+    for p in presentes:
+        p.confirmado = False
+    
+    Presente.query.delete()
+
+    db.session.commit()
+    return jsonify({"mensagem": "Banco de dados resetado com sucesso!"}), 200
+
 # Cria as tabelas antes da primeira requisição, se não existirem
 with app.app_context():
     db.create_all()
