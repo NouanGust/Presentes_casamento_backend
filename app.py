@@ -4,12 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 app = Flask(__name__)
-# Permite requisições do seu site estático
 CORS(app)
 
-# Configuração do Banco de Dados (pega da variável de ambiente no Render, ou usa SQLite localmente para testes)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
-# Correção necessária para o Render (troca postgres:// por postgresql://)
 if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
     app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
 
@@ -18,7 +15,7 @@ db = SQLAlchemy(app)
 
 # Modelo do Presente
 class Presente(db.Model):
-    id = db.Column(db.String(100), primary_key=True) # Ex: 'liquidificador-oster'
+    id = db.Column(db.String(100), primary_key=True)
     nome = db.Column(db.String(200), nullable=False)
     confirmado = db.Column(db.Boolean, default=False)
 
@@ -38,7 +35,6 @@ def confirmar_presente(presente_id):
     presente = Presente.query.get(presente_id)
     
     if not presente:
-        # Se o presente não existir no banco ainda, criamos ele já confirmado
         novo_presente = Presente(id=presente_id, nome=presente_id.replace('-', ' ').title(), confirmado=True)
         db.session.add(novo_presente)
         db.session.commit()
@@ -47,7 +43,7 @@ def confirmar_presente(presente_id):
     if presente.confirmado:
         return jsonify({"erro": "Presente já foi confirmado por outro convidado."}), 400
 
-    # Se já existir e não estiver confirmado, atualiza o status
+    
     presente.confirmado = True
     db.session.commit()
     return jsonify({"mensagem": "Presente confirmado com sucesso!"}), 200
